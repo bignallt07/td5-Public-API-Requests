@@ -12,11 +12,42 @@ const url = "https://randomuser.me/api/?results=12&nat=us";
 
 const buttons = document.querySelectorAll("button");
 
+const galleryDivs = galleryDiv.children;
+
+const apiData = [];
+
+const modals = [];
+
+// Add SearchBar
+
+
+
+const searchbar = document.querySelector(".search-container");
+searchbar.innerHTML = `
+<form action="#" method="get">
+    <input type="search" id="search-input" class="search-input" placeholder="Search...">
+    <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
+</form>`;
+
+const searchButton = document.querySelector("#search-submit");
+const inputValue = document.querySelector("#search-input");
 
 
 /******************************
  * Functions
  *****************************/
+function performSearch(inputValue, names) {
+   let arrayAccept = [];
+   const profiles = names[0].results;
+   for (let i = 0; i < profiles.length; i++) {
+      let fullName = `${profiles[i].name.first.toLowerCase()} ${profiles[i].name.last.toLowerCase()}`;
+      if (fullName.includes(inputValue) ) {
+         arrayAccept.push(profiles[i]);
+      }
+   }
+   return arrayAccept;
+}
+
 
  /**
   * createGallery Function
@@ -30,6 +61,7 @@ const buttons = document.querySelectorAll("button");
   */
 
 function createGallery(data) {
+    galleryDiv.innerHTML = "";
     console.log(data);
     for (let i = 0; i < data.length; i++) {
         const cardDiv = document.createElement("div");
@@ -47,13 +79,32 @@ function createGallery(data) {
         galleryDiv.insertAdjacentElement('beforeend', cardDiv);         // appends to div
 
          // modalWindow call
-        modalWindow(data[i]);
+        modals.push(modalWindow(data[i]));
+        
        
         // Event Listener
         cardDiv.addEventListener("click", () => {
             cardDiv.nextElementSibling.hidden = false;              // Every other div is a modal
-        });
+        });  
     }
+
+
+    // DIFFICULT
+    const nextButtons = document.querySelectorAll("#modal-next");
+    nextButtons.forEach(button => {
+        button.addEventListener("click", e => {
+            let modalContent = e.target.parentElement.parentElement;
+            for (let i = 0; i < modals.length; i++) {
+                // console.log(modalContent);
+                if (modals[i].innerHTML === modalContent.innerHTML) {
+                    modalContent.innerHTML = modals[i+1].innerHTML;
+                }
+            }
+        });
+    });
+    // console.log(nextButtons[4].parentElement.parentElement.innerHTML);
+    // console.log(modals[4].innerHTML);
+
 }
 
 /**
@@ -69,31 +120,62 @@ function modalWindow(person) {
     modalContainer.className = "modal-container";
     modalContainer.hidden = true;
     modalContainer.innerHTML = `
-       <div class="modal">
-        <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
-        <div class="modal-info-container">
-            <img class="modal-img" src="${person.picture.large}" alt="profile picture">
-            <h3 id="name" class="modal-name cap">${person.name.first} ${person.name.last}</h3>
-            <p class="modal-text">${person.email}</p>
-            <p class="modal-text cap">${person.location.state}</p>
-            <hr>
-            <p class="modal-text">${person.cell}</p>
-            <p class="modal-text">${person.location.street.number} ${person.location.street.name}, ${person.location.city}, ${person.location.state} ${person.location.postcode}</p>
-            <p class="modal-text">Birthday: ${person.dob.date.substring(0, 10)}</p>
+        <div class="modal">
+            <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
+            <div class="modal-info-container">
+                <img class="modal-img" src="${person.picture.large}" alt="profile picture">
+                <h3 id="name" class="modal-name cap">${person.name.first} ${person.name.last}</h3>
+                <p class="modal-text">${person.email}</p>
+                <p class="modal-text cap">${person.location.state}</p>
+                <hr>
+                <p class="modal-text">${person.cell.substring(0, 5)} ${person.cell.substring(6, 14)}</p>
+                <p class="modal-text">${person.location.street.number} ${person.location.street.name}, ${person.location.city}, ${person.location.state} ${person.location.postcode}</p>
+                <p class="modal-text">Birthday: ${reformatDOB(person.dob.date.substring(0, 10))}</p>
+            </div>
+        </div> 
+        <div class="modal-btn-container">
+            <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
+            <button type="button" id="modal-next" class="modal-next btn">Next</button>
         </div>
-    </div> 
     `;
     galleryDiv.insertAdjacentElement('beforeend', modalContainer);  
 
     // Button Event Listener to close modal window
-    const modalBtn = modalContainer.querySelector("button");
-    modalBtn.addEventListener("click", () => {
+    const closeBtn = modalContainer.querySelector("#modal-close-btn");
+    closeBtn.addEventListener("click", () => {
         modalContainer.hidden = true;
     });
+
+    return modalContainer;
+
 }
 
+// Unsure about this
 
 
+
+// Next and Prev Event Listener
+    // const buttonContainer = galleryDivs.querySelectorAll(".modal-btn-container");
+    // buttonContainer.addEventListener("click", e => {
+    //     if (e.target.tagName === "BUTTON") {
+    //         if (e.target.id === "modal-prev") {
+    //             modalContainer.innerHTML = modalContainer.previousElementSibling.previousElementSibling.innerHTML;
+    //         } else {
+    //             modalContainer.innerHTML = modalContainer.nextElementSibling.nextElementSibling.innerHTML;
+    //             goForward(e.target);
+    //         }
+    //     } 
+    // });
+
+
+
+
+// Function to return reformatted DOB
+function reformatDOB(dob) {
+    const regex = /^(\d{4})-(\d{2})-(\d{2})$/;          // REGEX that matches phone number
+    const replacement = "$2/$3/$1";                     // Replacement Groups
+    return dob.replace(regex, replacement);             // Return Replacement   
+}
 
 
 
@@ -116,26 +198,34 @@ function checkFetchStatus(response) {
 fetch(url)
     .then(checkFetchStatus)
     .then(response => response.json())
-    .then(data => createGallery(data.results))
+    .then(data => {
+        createGallery(data.results)
+        apiData.push(data);
+    })
     .catch(error => console.log("Error:", error))
-
-
-    
+ 
 // Notes for Extra Credit
-// I think that the search will need to set another fetch request for ALL the data
-                    
+// Filter things already on the page
+// Regex for the number and DOB
    
+// Event Listeners
+searchButton.addEventListener("click", () => {
+    const newArray = performSearch(inputValue.value.toLowerCase(), apiData);
+    createGallery(newArray);
+    if (newArray.length === 0) {
+        galleryDiv.innerHTML = "No results to dispay";
+    } 
+});
+
+inputValue.addEventListener("keyup", () => {
+    const newArray = performSearch(inputValue.value.toLowerCase(), apiData);
+    createGallery(newArray);
+    if (newArray.length === 0) {
+        galleryDiv.innerHTML = "No results to dispay";
+    } 
+});
     
 
 
 
 
-
-/*  ADD TO MODAL
-
- // IMPORTANT: Below is only for exceeds tasks 
-    <div class="modal-btn-container">
-        <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
-        <button type="button" id="modal-next" class="modal-next btn">Next</button>
-    </div>
-</div> */
