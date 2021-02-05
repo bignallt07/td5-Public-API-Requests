@@ -16,7 +16,7 @@ const galleryDivs = galleryDiv.children;
 
 const apiData = [];
 
-const modals = [];
+let modals = [];
 
 // Add SearchBar
 
@@ -62,7 +62,6 @@ function performSearch(inputValue, names) {
 
 function createGallery(data) {
     galleryDiv.innerHTML = "";
-    console.log(data);
     for (let i = 0; i < data.length; i++) {
         const cardDiv = document.createElement("div");
         cardDiv.className = "card";
@@ -81,15 +80,37 @@ function createGallery(data) {
          // modalWindow call
         modals.push(modalWindow(data[i]));
         
-       
         // Event Listener
         cardDiv.addEventListener("click", () => {
             cardDiv.nextElementSibling.hidden = false;              // Every other div is a modal
         });  
     }
 
-    // console.log(nextButtons[4].parentElement.parentElement.innerHTML);
-    // console.log(modals[4].innerHTML);
+    // remove first previous and last next buttons
+    removeNextandPrevious(modals);
+    console.log(modals);
+
+    // Note. We are adding to the modals everytime, we need to refresh the modal list
+    
+    // This below will allow to go to the NEXT or PREVIOUS modal
+
+    for (let i = 0; i < modals.length; i++) {
+        const buttonContainer = modals[i].lastElementChild;
+        buttonContainer.addEventListener("click", e => {
+            if (e.target.tagName === "BUTTON") {
+                const previousProfile = modals[i-1];
+                const nextProfile = modals[i+1];
+                modals[i].hidden = true;
+                if (e.target.id === "modal-prev") {
+                    previousProfile.hidden = false;
+                } else {
+                    nextProfile.hidden = false;
+                }
+            }
+        });
+    }
+
+ 
 
 }
 
@@ -131,23 +152,26 @@ function modalWindow(person) {
     closeBtn.addEventListener("click", () => {
         modalContainer.hidden = true;
     });
-    
-    // Next and Prev Event Listener
-    const buttonContainer = modalContainer.lastElementChild;
-    buttonContainer.addEventListener("click", e => {
-        if (e.target.tagName === "BUTTON") {
-            const previousProfile = modalContainer.previousElementSibling.previousElementSibling;
-            const nextProfile = modalContainer.nextElementSibling.nextElementSibling;
-            console.log(nextProfile);
-            modalContainer.hidden = true;
-            if (e.target.id === "modal-prev") {
-                previousProfile.hidden = false;  
-            } else if (e.target.id === "modal-next") {
-                nextProfile.hidden = false;
-            } 
 
-        } 
-    });
+    
+    // // Next and Prev Event Listener
+    // const buttonContainer = modalContainer.lastElementChild;
+    // buttonContainer.addEventListener("click", e => {
+    //     if (e.target.tagName === "BUTTON") {
+    //         const previousProfile = modalContainer.previousElementSibling.previousElementSibling;
+    //         const nextProfile = modalContainer.nextElementSibling.nextElementSibling;
+    //         if (!nextProfile || previousProfile === null) {
+    //             modalContainer.hidden = true;
+    //         } else {
+    //             modalContainer.hidden = true;
+    //             if (e.target.id === "modal-prev") {
+    //                 previousProfile.hidden = false;  
+    //             } else if (e.target.id === "modal-next") {
+    //                 nextProfile.hidden = false;
+    //             } 
+    //         }
+    //     } 
+    // });
 
     return modalContainer;
 }
@@ -157,6 +181,11 @@ function reformatDOB(dob) {
     const regex = /^(\d{4})-(\d{2})-(\d{2})$/;          // REGEX that matches phone number
     const replacement = "$2/$3/$1";                     // Replacement Groups
     return dob.replace(regex, replacement);             // Return Replacement   
+}
+
+function removeNextandPrevious(modals) {
+    modals[0].lastElementChild.firstElementChild.style.display = "none";
+    modals[modals.length - 1].lastElementChild.lastElementChild.style.display = "none";
 }
 
 
@@ -192,6 +221,7 @@ fetch(url)
    
 // Event Listeners
 searchButton.addEventListener("click", () => {
+    modals = [];
     const newArray = performSearch(inputValue.value.toLowerCase(), apiData);
     createGallery(newArray);
     if (newArray.length === 0) {
@@ -200,6 +230,7 @@ searchButton.addEventListener("click", () => {
 });
 
 inputValue.addEventListener("keyup", () => {
+    modals = [];
     const newArray = performSearch(inputValue.value.toLowerCase(), apiData);
     createGallery(newArray);
     if (newArray.length === 0) {
