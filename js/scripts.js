@@ -88,20 +88,6 @@ function createGallery(data) {
         });  
     }
 
-
-    // DIFFICULT
-    const nextButtons = document.querySelectorAll("#modal-next");
-    nextButtons.forEach(button => {
-        button.addEventListener("click", e => {
-            let modalContent = e.target.parentElement.parentElement;
-            for (let i = 0; i < modals.length; i++) {
-                // console.log(modalContent);
-                if (modals[i].innerHTML === modalContent.innerHTML) {
-                    modalContent.innerHTML = modals[i+1].innerHTML;
-                }
-            }
-        });
-    });
     // console.log(nextButtons[4].parentElement.parentElement.innerHTML);
     // console.log(modals[4].innerHTML);
 
@@ -145,30 +131,26 @@ function modalWindow(person) {
     closeBtn.addEventListener("click", () => {
         modalContainer.hidden = true;
     });
+    
+    // Next and Prev Event Listener
+    const buttonContainer = modalContainer.lastElementChild;
+    buttonContainer.addEventListener("click", e => {
+        if (e.target.tagName === "BUTTON") {
+            const previousProfile = modalContainer.previousElementSibling.previousElementSibling;
+            const nextProfile = modalContainer.nextElementSibling.nextElementSibling;
+            console.log(nextProfile);
+            modalContainer.hidden = true;
+            if (e.target.id === "modal-prev") {
+                previousProfile.hidden = false;  
+            } else if (e.target.id === "modal-next") {
+                nextProfile.hidden = false;
+            } 
+
+        } 
+    });
 
     return modalContainer;
-
 }
-
-// Unsure about this
-
-
-
-// Next and Prev Event Listener
-    // const buttonContainer = galleryDivs.querySelectorAll(".modal-btn-container");
-    // buttonContainer.addEventListener("click", e => {
-    //     if (e.target.tagName === "BUTTON") {
-    //         if (e.target.id === "modal-prev") {
-    //             modalContainer.innerHTML = modalContainer.previousElementSibling.previousElementSibling.innerHTML;
-    //         } else {
-    //             modalContainer.innerHTML = modalContainer.nextElementSibling.nextElementSibling.innerHTML;
-    //             goForward(e.target);
-    //         }
-    //     } 
-    // });
-
-
-
 
 // Function to return reformatted DOB
 function reformatDOB(dob) {
