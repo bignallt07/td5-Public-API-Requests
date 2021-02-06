@@ -5,37 +5,30 @@
 /*****************************
  * Collecting DOM Elements and Variable Declaration
 *****************************/
+const url = "https://randomuser.me/api/?results=12&nat=us";
+
 const searchContainer = document.querySelector(".search-container");
 const galleryDiv = document.querySelector("#gallery");
 
-const url = "https://randomuser.me/api/?results=12&nat=us";
-
 const buttons = document.querySelectorAll("button");
-
-const galleryDivs = galleryDiv.children;
-
 const apiData = [];
 
 let modals = [];
-
-// Add SearchBar
-
-
-
-const searchbar = document.querySelector(".search-container");
-searchbar.innerHTML = `
-<form action="#" method="get">
-    <input type="search" id="search-input" class="search-input" placeholder="Search...">
-    <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
-</form>`;
-
-const searchButton = document.querySelector("#search-submit");
-const inputValue = document.querySelector("#search-input");
 
 
 /******************************
  * Functions
  *****************************/
+
+/**
+ * performSearch Function
+ * Description: Runs through the list of names and compares the input value. Before returning a new array
+ * 
+ * @param {string} inputValue - value collected in the search bar
+ * @param {array} names - An array of data collected from the API. Between 1 - 12 names
+ * @returns {array} - A list of names of all profiles that match the input
+ */
+
 function performSearch(inputValue, names) {
    let arrayAccept = [];
    const profiles = names[0].results;
@@ -50,24 +43,28 @@ function performSearch(inputValue, names) {
 
 
  /**
-  * createGallery Function
-  * Description: Creates a gallery of 12 profiles from API data. Including
-  *                 1. Creates card for each object returned from the API
-  *                 2. Calls the modalWindow function
+  * "createGallery" Function
+  * Description: Creates a gallery of 12 or less profiles from API data. This function is broken into 5 parts:
+  *                 1. Resets the gallery UL and creates card for each object returned from the API
+  *                 2. Calls the modalWindow function, and adds each modal to the modals array
+  *                 3. Creates a click event for each card. This will show the modal
   *                 3. Listens to click event on each created card
+  *                 4. After the loop, call the "removeNextandPrevious" function
+  *                 5. Create a new loop which allows you to move to the previous or next modal with event listener
   * 
   * @param {json} data - Recieved JSON from the API call
-  * @returns - Creates and displays gallery of 12 people
+  * @returns - Creates and displays gallery of 12 or less profiles
   */
 
 function createGallery(data) {
+    // Part 1
     galleryDiv.innerHTML = "";
     for (let i = 0; i < data.length; i++) {
         const cardDiv = document.createElement("div");
         cardDiv.className = "card";
         cardDiv.innerHTML = `
             <div class="card-img-container">
-                <img class="card-img" src="${data[i].picture.thumbnail}" alt="profile picture">
+                <img class="card-img" src="${data[i].picture.large}" alt="profile picture">
             </div>
             <div class="card-info-container">
                 <h3 id="name" class="card-name cap">${data[i].name.first} ${data[i].name.last}</h3>
@@ -75,25 +72,23 @@ function createGallery(data) {
                 <p class="card-text cap">${data[i].location.city}, ${data[i].location.state}</p>
             </div>
         `;
-        galleryDiv.insertAdjacentElement('beforeend', cardDiv);         // appends to div
+        galleryDiv.insertAdjacentElement('beforeend', cardDiv);         
 
-         // modalWindow call
+        // Part 2
         modals.push(modalWindow(data[i]));
         
-        // Event Listener
+        // Part 3
         cardDiv.addEventListener("click", () => {
-            cardDiv.nextElementSibling.hidden = false;              // Every other div is a modal
+            cardDiv.nextElementSibling.hidden = false;              // Developer Note: Every other DIV UL is a modal div
         });  
     }
 
-    // remove first previous and last next buttons
-    removeNextandPrevious(modals);
-    console.log(modals);
-
-    // Note. We are adding to the modals everytime, we need to refresh the modal list
+    // Part 4
+    if (modals.length > 0) {
+        removeNextandPrevious(modals);
+    }
     
-    // This below will allow to go to the NEXT or PREVIOUS modal
-
+    // Part 5
     for (let i = 0; i < modals.length; i++) {
         const buttonContainer = modals[i].lastElementChild;
         buttonContainer.addEventListener("click", e => {
@@ -109,16 +104,16 @@ function createGallery(data) {
             }
         });
     }
-
- 
-
 }
 
 /**
- * modalWindow Function
- * Description: Creates a modal window for each of the profiles from the API. Function includes
+ * "modalWindow" Function
+ * Description: Creates a modal window for each of the profiles from the API data. Function includes:
  *              1. Creates the modal and appends to the DOM using template literals
  *              2. Collects the button from the created DIV, and adds an event listener. This closes the modal window
+ * 
+ * @param {object} - One profile object from the collected API data
+ * @returns {variable} - Variable holding the HTML creation for the profile modal 
  */
 
 // Function that connects to the DOM
@@ -147,54 +142,48 @@ function modalWindow(person) {
     `;
     galleryDiv.insertAdjacentElement('beforeend', modalContainer);  
 
-    // Button Event Listener to close modal window
+    // Close button Event Listener
     const closeBtn = modalContainer.querySelector("#modal-close-btn");
     closeBtn.addEventListener("click", () => {
         modalContainer.hidden = true;
     });
 
-    
-    // // Next and Prev Event Listener
-    // const buttonContainer = modalContainer.lastElementChild;
-    // buttonContainer.addEventListener("click", e => {
-    //     if (e.target.tagName === "BUTTON") {
-    //         const previousProfile = modalContainer.previousElementSibling.previousElementSibling;
-    //         const nextProfile = modalContainer.nextElementSibling.nextElementSibling;
-    //         if (!nextProfile || previousProfile === null) {
-    //             modalContainer.hidden = true;
-    //         } else {
-    //             modalContainer.hidden = true;
-    //             if (e.target.id === "modal-prev") {
-    //                 previousProfile.hidden = false;  
-    //             } else if (e.target.id === "modal-next") {
-    //                 nextProfile.hidden = false;
-    //             } 
-    //         }
-    //     } 
-    // });
-
     return modalContainer;
 }
 
-// Function to return reformatted DOB
+/**
+ * "reformatDOB" Function
+ * Description: Use regular expression to create groups in the DOB (Date of Birth) parameter, reformat to MM/DD/YYYY format
+ * 
+ * @param {*} dob - Date of Birth from API data for 1 profile
+ * @returns {string} - Reformatted DOB
+ */
 function reformatDOB(dob) {
-    const regex = /^(\d{4})-(\d{2})-(\d{2})$/;          // REGEX that matches phone number
-    const replacement = "$2/$3/$1";                     // Replacement Groups
-    return dob.replace(regex, replacement);             // Return Replacement   
+    const regex = /^(\d{4})-(\d{2})-(\d{2})$/;          
+    const replacement = "$2/$3/$1";                    
+    return dob.replace(regex, replacement);              
 }
+
+/**
+ * "removeNextandPrevious" Function
+ * Description: Removes the "Prev" button of the first modal in array and "next" button of last modal in array on each call
+ *  
+ * @param {array} modals - Array of created modals from the createGallery function
+ * @returns - Updates DOM buttons 
+ */
 
 function removeNextandPrevious(modals) {
     modals[0].lastElementChild.firstElementChild.style.display = "none";
     modals[modals.length - 1].lastElementChild.lastElementChild.style.display = "none";
 }
 
-
-
 /**
- * Fetching data
+ * "checkFetchStatus" Function
+ * Description: Tests to see whether the API request was successful - 200 status
+ * 
+ * @param {response} response - From the API Fetch Request 
+ * @returns {promise} - resolve promise, or active catch from rejection
  */
-
-// This function tests the respose of the fetch request. If not 200, throws an error and activates catch
 function checkFetchStatus(response) {
     if (response.ok) {
         return Promise.resolve(response);
@@ -203,8 +192,33 @@ function checkFetchStatus(response) {
     }
 }
 
+/*****************************
+ * DOM Creation - Add the Searchbar 
+ *****************************/
 
-// Fetchs JSON from API request, then launches the createGallery function
+const searchbar = document.querySelector(".search-container");
+searchbar.innerHTML = `
+<form action="#" method="get">
+    <input type="search" id="search-input" class="search-input" placeholder="Search...">
+    <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
+</form>`;
+
+const searchButton = document.querySelector("#search-submit");
+const inputValue = document.querySelector("#search-input");
+
+/*****************************
+ * Fetching data
+ ****************************/
+/**
+ * Developer Notes for FETCH API Request
+ * 
+ * 1. Fetch the API using the URL stored in variable
+ * 2. Check the status of it. If it is successful:
+ *          a) Parse to JSON
+ *          b) Then call create gallery function
+ *          c) And add fetched data to array
+ * 3. If unsuccessful catch the error and console and error
+ */
 
 fetch(url)
     .then(checkFetchStatus)
@@ -214,18 +228,19 @@ fetch(url)
         apiData.push(data);
     })
     .catch(error => console.log("Error:", error))
+    // ADD TO DISPLAY THAT IT DIDN'T WORK
  
-// Notes for Extra Credit
-// Filter things already on the page
-// Regex for the number and DOB
-   
-// Event Listeners
+
+/*****************************
+ * Event Listeners - Both for the search bar
+ ****************************/   
+
 searchButton.addEventListener("click", () => {
     modals = [];
     const newArray = performSearch(inputValue.value.toLowerCase(), apiData);
     createGallery(newArray);
-    if (newArray.length === 0) {
-        galleryDiv.innerHTML = "No results to dispay";
+    if (newArray.length < 1) {
+        galleryDiv.innerHTML = "No results to display";
     } 
 });
 
@@ -233,8 +248,8 @@ inputValue.addEventListener("keyup", () => {
     modals = [];
     const newArray = performSearch(inputValue.value.toLowerCase(), apiData);
     createGallery(newArray);
-    if (newArray.length === 0) {
-        galleryDiv.innerHTML = "No results to dispay";
+    if (newArray.length < 1) {
+        galleryDiv.innerHTML = "No results to display";
     } 
 });
     
