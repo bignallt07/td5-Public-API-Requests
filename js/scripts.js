@@ -224,10 +224,13 @@ fetch(url)
     .then(checkFetchStatus)
     .then(response => response.json())
     .then(data => {
-        createGallery(data.results)
+        createGallery(data.results);
         apiData.push(data);
     })
-    .catch(error => console.log("Error:", error))
+    .catch(error => {
+        console.error("Error:", error);
+        galleryDiv.innerHTML = "Error loading profiles, please refresh the page";
+    })
     // ADD TO DISPLAY THAT IT DIDN'T WORK
  
 

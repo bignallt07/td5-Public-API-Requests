@@ -16,7 +16,7 @@ html, body {
 body {
     font-family: "Nunito", sans-serif;
     text-align: center;
-    background: rgba(235, 235, 235, 0.9);
+    background: rgba(160, 172, 184, 0.9);
 }
 
 header {
@@ -30,7 +30,7 @@ header {
 
 header h1 {
     font-size: 1.25em;
-    color: rgba(50, 50, 50, 0.9);
+    color: rgba(83, 69, 69, 0.9);
     margin-top: 35px;
 }
 
@@ -89,9 +89,9 @@ header h1 {
     padding: 10px;
     background: rgba(245, 245, 245, 0.9);
     border-radius: 0.25em;
-    border: 1px solid rgba(50, 50, 50, 0.3);
     transition: .4s ease-out;
     overflow: hidden;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.212);
 }
 
 .card-img {
@@ -130,7 +130,7 @@ header h1 {
     right: 0;
     bottom: 0;
     left: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background-color: rgba(160, 172, 184, 0.7);
 }
 
 .modal {
@@ -206,6 +206,22 @@ header h1 {
     transition: .4s ease-out;
     outline: none;
   }
+
+/************************************************
+* Extra credit animation added on modal click 
+*************************************************/
+
+.modal-container {
+    animation-name: modal-animation;
+    animation-duration: 3s;  
+}
+
+@keyframes modal-animation {
+    from {background-color: rgba(160, 172, 184, 1);}
+    to {background-color: rgba(160, 172, 184, 0.7);}
+}
+
+/* End of animation */
   
 
 /* ===================================== 
@@ -249,7 +265,7 @@ header h1 {
 
     .card:hover {
         background: rgba(255, 255, 255, 1);
-        border: 1px solid rgba(50, 50, 50, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.212);
     }
 
     .card:hover .card-text {
@@ -261,3 +277,4 @@ header h1 {
         color: rgba(25, 25, 25, 1); 
     }
 }
+
