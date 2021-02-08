@@ -40,5 +40,8 @@ Curriculum at teamtreehouse.com
 API Fetched from: https://randomuser.me/
 w3schools.com
 
+### Notes from reviewer to improve:
+Here's a few tips for you. Right now, you're creating a modal for each user. That's not the worst thing in this small app. But imagine if there a thousand or more employees in this directory. Ideally, you should only create a single modal, add it to the DOM once, and then just update, hide and display it as needed. And for your card hover styles. You're adding a border to the card on hover. You can't animate or transition the creation of a border. So it creates or sort of sketchy experience for the user as they hover on and off of cards. So a little trick is to add a transparent border to the cards, and then in the hover rule, just change the color of the border. And as long as you have a nice transition property on the card, you'll get a really smooth experience with the updating border on hover. Hope that helps. :thumbsup:
+
 
 
