@@ -92,6 +92,7 @@ header h1 {
     transition: .4s ease-out;
     overflow: hidden;
     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.212);
+    border: 2px solid rgba(211, 211, 211, 0);
 }
 
 .card-img {
@@ -265,7 +266,7 @@ header h1 {
 
     .card:hover {
         background: rgba(255, 255, 255, 1);
-        border: 1px solid rgba(0, 0, 0, 0.212);
+        border-color: rgba(211, 211, 211, 1);     
     }
 
     .card:hover .card-text {
